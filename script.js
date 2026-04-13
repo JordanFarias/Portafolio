@@ -1,3 +1,6 @@
+/* =============================================
+   DOTS BACKGROUND CANVAS
+   ============================================= */
 const canvas = document.getElementById('dots-bg');
 const ctx = canvas.getContext('2d');
 
@@ -52,6 +55,9 @@ function draw() {
 
 draw();
 
+/* =============================================
+   SKILL CARDS — MOUSE GLOW EFFECT
+   ============================================= */
 document.querySelectorAll('.skill-card').forEach(card => {
     card.addEventListener('mousemove', (e) => {
         const rect = card.getBoundingClientRect();
@@ -59,3 +65,85 @@ document.querySelectorAll('.skill-card').forEach(card => {
         card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
     });
 });
+
+/* =============================================
+   CONTACT FORM — FORMSPREE + FEEDBACK
+   ============================================= */
+const form = document.getElementById('contacto-form');
+const feedback = document.getElementById('form-feedback');
+const btnEnviar = document.getElementById('btn-enviar');
+const btnTexto = document.getElementById('btn-texto');
+const btnSpinner = document.getElementById('btn-spinner');
+
+if (form) {
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Clear previous feedback and errors
+        feedback.textContent = '';
+        feedback.className = 'form-feedback';
+        form.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+
+        // Basic client-side validation
+        const nombre = form.querySelector('#nombre');
+        const email = form.querySelector('#email');
+        const mensaje = form.querySelector('#mensaje');
+        let hasError = false;
+
+        if (!nombre.value.trim()) {
+            nombre.classList.add('input-error');
+            hasError = true;
+        }
+        if (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+            email.classList.add('input-error');
+            hasError = true;
+        }
+        if (!mensaje.value.trim()) {
+            mensaje.classList.add('input-error');
+            hasError = true;
+        }
+
+        if (hasError) {
+            feedback.textContent = 'Por favor, completa todos los campos correctamente.';
+            feedback.className = 'form-feedback error';
+            return;
+        }
+
+        // Show loading state
+        btnEnviar.disabled = true;
+        btnTexto.textContent = 'Enviando...';
+        btnSpinner.style.display = 'inline-block';
+
+        try {
+            const data = new FormData(form);
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: data,
+                headers: { Accept: 'application/json' }
+            });
+
+            if (response.ok) {
+                feedback.textContent = '¡Mensaje enviado con éxito! Me pondré en contacto pronto.';
+                feedback.className = 'form-feedback success';
+                form.reset();
+            } else {
+                const json = await response.json().catch(() => ({}));
+                const msg = json?.errors?.map(err => err.message).join(', ') || 'Error al enviar. Inténtalo de nuevo.';
+                feedback.textContent = msg;
+                feedback.className = 'form-feedback error';
+            }
+        } catch {
+            feedback.textContent = 'Error de red. Revisa tu conexión e inténtalo de nuevo.';
+            feedback.className = 'form-feedback error';
+        } finally {
+            btnEnviar.disabled = false;
+            btnTexto.textContent = 'Enviar mensaje';
+            btnSpinner.style.display = 'none';
+        }
+    });
+
+    // Remove error style on input
+    form.querySelectorAll('input, textarea').forEach(el => {
+        el.addEventListener('input', () => el.classList.remove('input-error'));
+    });
+}
