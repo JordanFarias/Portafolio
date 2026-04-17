@@ -77,39 +77,16 @@ const btnSpinner = document.getElementById('btn-spinner');
 
 if (form) {
     form.addEventListener('submit', async (e) => {
+        // Evitamos que la página se recargue.
+        // Si el código llega a este punto, el navegador YA comprobó que se 
+        // cumplen las reglas del HTML (minlength, email válido, no vacíos).
         e.preventDefault();
 
-        // Clear previous feedback and errors
+        // Limpiamos mensajes previos
         feedback.textContent = '';
         feedback.className = 'form-feedback';
-        form.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
 
-        // Basic client-side validation
-        const nombre = form.querySelector('#nombre');
-        const email = form.querySelector('#email');
-        const mensaje = form.querySelector('#mensaje');
-        let hasError = false;
-
-        if (!nombre.value.trim()) {
-            nombre.classList.add('input-error');
-            hasError = true;
-        }
-        if (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-            email.classList.add('input-error');
-            hasError = true;
-        }
-        if (!mensaje.value.trim()) {
-            mensaje.classList.add('input-error');
-            hasError = true;
-        }
-
-        if (hasError) {
-            feedback.textContent = 'Por favor, completa todos los campos correctamente.';
-            feedback.className = 'form-feedback error';
-            return;
-        }
-
-        // Show loading state
+        // Mostramos el estado de carga y el spinner
         btnEnviar.disabled = true;
         btnTexto.textContent = 'Enviando...';
         btnSpinner.style.display = 'inline-block';
@@ -140,10 +117,5 @@ if (form) {
             btnTexto.textContent = 'Enviar mensaje';
             btnSpinner.style.display = 'none';
         }
-    });
-
-    // Remove error style on input
-    form.querySelectorAll('input, textarea').forEach(el => {
-        el.addEventListener('input', () => el.classList.remove('input-error'));
     });
 }
